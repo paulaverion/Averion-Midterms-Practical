@@ -39,8 +39,10 @@ def register_user(username, password, free_rental = 0,  transactions = 0, balanc
 # Function to rent a game
 def rent_game(username):
     display_available_games()
+    rentals = user_accounts.get(username, {}).get("free rental")
     balance = user_accounts.get(username, {}).get("balance")
-    print(f"Your balance: {balance}")
+    print(f"Your balance: ${balance}")
+    print(f"Your free rentals: {rentals}")
     rent_choice = int(input("What will you use? (1 for Free Rentals, 0 for Money): "))
     
     choice = input("Pick a game you want to rent: ")
@@ -68,11 +70,11 @@ def rent_game(username):
             logged_in_menu(username)
         
     elif rent_choice == 1:
-        free_rental = user_accounts.get(username, {}).get("free_rental")
-        if free_rental == 0:
+
+        if user_accounts[username]["free rental"] == 0:
             print("You have no points.")
         else:
-            user_accounts[username]["free_rental"] -= 1
+            user_accounts[username]["free rental"] -= 1
             user_accounts[username]["inventory"].append(choice)
             game["quantity"] -= 1
             print("You have rented ", choice)
@@ -172,9 +174,9 @@ def admin_update_game():
 def admin_login():
     while True:
         print("Admin Login")
-        username = input("\nAdmin username: ")
+        username = input("Admin username: ")
         if username == admin_username:
-            password = input("\nPassword: ")
+            password = input("Password: ")
             if password == admin_password:
                 admin_menu()
                 break
@@ -208,10 +210,9 @@ def admin_menu():
 def redeem_free_rental(username):
     user_accounts[username]["points"] = user_accounts[username]["transactions"] / 2
     points = user_accounts[username]["points"]
-    rentals = user_accounts[username]["free rental"]
 
     print("Your points: ", user_accounts[username]["points"], "\n")
-    print("2 points = 1 free rental")
+    print("3 points = 1 free rental")
 
     amount = int(input("How many would you like to redeem?: "))
     try:
@@ -222,9 +223,9 @@ def redeem_free_rental(username):
             print("Input a positive number.")
             logged_in_menu(username)
         elif amount >= 1:
-            points -= amount * 3
+            user_accounts[username]["transactions"] -= amount * 6
             print("Successfully redeemed ", amount, " free rental(s).")
-            rentals += amount
+            user_accounts[username]["free rental"] += amount
             logged_in_menu(username)
         else:
             logged_in_menu(username)
